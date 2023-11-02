@@ -1,7 +1,6 @@
 {
   "imports": {
     "deco-sites/hack-adaptio/": "./",
-
     "$store/": "./",
     "deco/": "https://denopkg.com/deco-cx/deco@1.45.1/",
     "apps/": "https://denopkg.com/adaptio-apps/apps@main/",

@@ -1,7 +1,7 @@
 import { SendEventOnLoad } from "$store/components/Analytics.tsx";
 import ProductCard, {
   Layout as cardLayout,
-} from "apps/hackaton/components/ProductCard.tsx";
+} from "$store/components/product/ProductCard.tsx";
 import Icon from "$store/components/ui/Icon.tsx";
 import Header from "$store/components/ui/SectionHeader.tsx";
 import Slider from "$store/components/ui/Slider.tsx";
