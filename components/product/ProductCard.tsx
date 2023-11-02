@@ -14,7 +14,7 @@ export interface Layout {
     contentAlignment?: "Left" | "Center";
     oldPriceSize?: "Small" | "Normal";
     ctaText?: string;
-  };
+  };  
   elementsPositions?: {
     skuSelector?: "Top" | "Bottom";
     favoriteIcon?: "Top right" | "Top left";
