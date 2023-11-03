@@ -12,9 +12,12 @@ import Image from "apps/website/components/Image.tsx";
 export interface Layout {
   basics?: {
     contentAlignment?: "Left" | "Center";
+    iconPosition?: "Left" | "Center";
     oldPriceSize?: "Small" | "Normal";
+    newPriceSize?: "Normal" | "Big";
+    productTitleSize?: "Normal" | "Big";
     ctaText?: string;
-  };  
+  };
   elementsPositions?: {
     skuSelector?: "Top" | "Bottom";
     favoriteIcon?: "Top right" | "Top left";
@@ -38,6 +41,7 @@ export interface Layout {
 }
 
 interface Props {
+  /** @ignore **/
   product: Product;
   /** Preload card image */
   preload?: boolean;
@@ -49,6 +53,7 @@ interface Props {
   index?: number;
 
   layout?: Layout;
+
   platform?: Platform;
 }
 
@@ -60,17 +65,15 @@ const relative = (url: string) => {
 const WIDTH = 200;
 const HEIGHT = 279;
 
-function ProductCard(
-  { product, preload, itemListName, layout, platform, index }: Props,
-) {
-  const {
-    url,
-    productID,
-    name,
-    image: images,
-    offers,
-    isVariantOf,
-  } = product;
+function ProductCard({
+  product,
+  preload,
+  itemListName,
+  layout,
+  platform,
+  index,
+}: Props) {
+  const { url, productID, name, image: images, offers, isVariantOf } = product;
   const id = `product-card-${productID}`;
   const hasVariant = isVariantOf?.hasVariant ?? [];
   const productGroupID = isVariantOf?.productGroupID;
@@ -86,14 +89,9 @@ function ProductCard(
       ? "left"
       : "center";
   const skuSelector = variants.map(([value, link]) => (
-    <li>
-      <a href={link}>
-        <Avatar
-          variant={link === url ? "active" : link ? "default" : "disabled"}
-          content={value}
-        />
-      </a>
-    </li>
+    <option>
+      <a href={link}>{value}</a>
+    </option>
   ));
   const cta = (
     <a
@@ -105,6 +103,16 @@ function ProductCard(
     </a>
   );
 
+  const [priceFlex, priceFontSize, hiddenSpan, spanSize] =
+    l?.basics?.newPriceSize === "Normal"
+      ? ["lg:flex-row", "lg:text-xl", "hidden", ""]
+      : ["lg:flex-col", "lg:text-3xl", "", "lg:text-lg"];
+
+  const [flexCard, imageMin] =
+    l?.basics?.iconPosition === "Center"
+      ? ["flex-col", ""]
+      : ["flex-row", "min-w-[120px]"];
+
   return (
     <div
       id={id}
@@ -112,13 +120,14 @@ function ProductCard(
         align === "center" ? "text-center" : "text-start"
       } ${l?.onMouseOver?.showCardShadow ? "lg:hover:card-bordered" : ""}
         ${
-        l?.onMouseOver?.card === "Move up" &&
-        "duration-500 transition-translate ease-in-out lg:hover:-translate-y-2"
-      }
+          l?.onMouseOver?.card === "Move up" &&
+          "duration-500 transition-translate ease-in-out lg:hover:-translate-y-2"
+        }
+        ${flexCard}
       `}
       data-deco="view-product"
     >
-      <SendEventOnClick
+      {/* <SendEventOnClick
         id={id}
         event={{
           name: "select_item" as const,
@@ -134,14 +143,15 @@ function ProductCard(
             ],
           },
         }}
-      />
-      <figure
-        class="relative overflow-hidden"
-        style={{ aspectRatio: `${WIDTH} / ${HEIGHT}` }}
-      >
-        {/* Wishlist button */}
-        <div
-          class={`absolute top-2 z-10
+      /> */}
+      <div id="figure" class={imageMin}>
+        <figure
+          class="relative overflow-hidden"
+          style={{ aspectRatio: `${WIDTH} / ${HEIGHT}` }}
+        >
+          {/* Wishlist button */}
+          <div
+            class={`absolute top-2 z-10
           ${
             l?.elementsPositions?.favoriteIcon === "Top left"
               ? "left-2"
@@ -153,158 +163,187 @@ function ProductCard(
               : "lg:hidden"
           }
         `}
-        >
-          {platform === "vtex" && (
+          >
+            {/* {platform === "vtex" && (
             <WishlistButton
               productGroupID={productGroupID}
               productID={productID}
             />
-          )}
-        </div>
-        {/* Product Images */}
-        <a
-          href={url && relative(url)}
-          aria-label="view product"
-          class="grid grid-cols-1 grid-rows-1 w-full"
-        >
-          <Image
-            src={front.url!}
-            alt={front.alternateName}
-            width={WIDTH}
-            height={HEIGHT}
-            class={`bg-base-100 col-span-full row-span-full rounded w-full ${
-              l?.onMouseOver?.image == "Zoom image"
-                ? "duration-100 transition-scale scale-100 lg:group-hover:scale-125"
-                : ""
-            }`}
-            sizes="(max-width: 640px) 50vw, 20vw"
-            preload={preload}
-            loading={preload ? "eager" : "lazy"}
-            decoding="async"
-          />
-          {(!l?.onMouseOver?.image ||
-            l?.onMouseOver?.image == "Change image") && (
+          )} */}
+          </div>
+          {/* Product Images */}
+          <a
+            href={url && relative(url)}
+            aria-label="view product"
+            class="grid grid-cols-1 grid-rows-1 w-full"
+          >
             <Image
-              src={back?.url ?? front.url!}
-              alt={back?.alternateName ?? front.alternateName}
+              src={front.url!}
+              alt={front.alternateName}
               width={WIDTH}
               height={HEIGHT}
-              class="bg-base-100 col-span-full row-span-full transition-opacity rounded w-full opacity-0 lg:group-hover:opacity-100"
+              class={`bg-base-100 col-span-full row-span-full rounded w-full ${
+                l?.onMouseOver?.image == "Zoom image"
+                  ? "duration-100 transition-scale scale-100 lg:group-hover:scale-125"
+                  : ""
+              }`}
               sizes="(max-width: 640px) 50vw, 20vw"
-              loading="lazy"
+              preload={preload}
+              loading={preload ? "eager" : "lazy"}
               decoding="async"
             />
-          )}
-        </a>
-        <figcaption
-          class={`
+            {(!l?.onMouseOver?.image ||
+              l?.onMouseOver?.image == "Change image") && (
+              <Image
+                src={back?.url ?? front.url!}
+                alt={back?.alternateName ?? front.alternateName}
+                width={WIDTH}
+                height={HEIGHT}
+                class="bg-base-100 col-span-full row-span-full transition-opacity rounded w-full opacity-0 lg:group-hover:opacity-100"
+                sizes="(max-width: 640px) 50vw, 20vw"
+                loading="lazy"
+                decoding="async"
+              />
+            )}
+          </a>
+          <figcaption
+            class={`
           absolute bottom-1 left-0 w-full flex flex-col gap-3 p-2 ${
             l?.onMouseOver?.showSkuSelector || l?.onMouseOver?.showCta
               ? "transition-opacity opacity-0 lg:group-hover:opacity-100"
               : "lg:hidden"
           }`}
-        >
-          {/* SKU Selector */}
-          {l?.onMouseOver?.showSkuSelector && (
-            <ul class="flex justify-center items-center gap-2 w-full">
-              {skuSelector}
-            </ul>
-          )}
-          {l?.onMouseOver?.showCta && cta}
-        </figcaption>
-      </figure>
+          >
+            {/* SKU Selector */}
+            {l?.onMouseOver?.showSkuSelector && (
+              <ul class="flex justify-center items-center gap-2 w-full">
+                {skuSelector}
+              </ul>
+            )}
+            {l?.onMouseOver?.showCta && cta}
+          </figcaption>
+        </figure>
+      </div>
       {/* Prices & Name */}
-      <div class="flex-auto flex flex-col p-2 gap-3 lg:gap-4">
+      <div class="flex-auto flex flex-col p-2 gap-3">
         {/* SKU Selector */}
         {(!l?.elementsPositions?.skuSelector ||
           l?.elementsPositions?.skuSelector === "Top") && (
           <>
-            {l?.hide?.skuSelector ? "" : (
-              <ul
-                class={`flex items-center gap-2 w-full overflow-auto p-3 ${
+            {l?.hide?.skuSelector ? (
+              ""
+            ) : (
+              <div
+                class={`flex items-center gap-2 w-full ${
                   align === "center" ? "justify-center" : "justify-start"
                 } ${l?.onMouseOver?.showSkuSelector ? "lg:hidden" : ""}`}
               >
-                {skuSelector}
-              </ul>
+                <select
+                  id="countries"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm block w-full p-2.5"
+                >
+                  <option selected>Escolha um tamanho</option>
+                  {skuSelector}
+                </select>
+              </div>
             )}
           </>
         )}
 
-        {l?.hide?.productName && l?.hide?.productDescription
-          ? ""
-          : (
-            <div class="flex flex-col gap-0">
-              {l?.hide?.productName ? "" : (
-                <h2
-                  class="truncate text-base lg:text-lg text-base-content"
-                  dangerouslySetInnerHTML={{ __html: name ?? "" }}
-                />
-              )}
-              {l?.hide?.productDescription ? "" : (
-                <div
-                  class="truncate text-sm lg:text-sm text-neutral"
-                  dangerouslySetInnerHTML={{ __html: description ?? "" }}
-                />
-              )}
-            </div>
-          )}
-        {l?.hide?.allPrices ? "" : (
-          <div class="flex flex-col gap-2">
+        {l?.hide?.productName && l?.hide?.productDescription ? (
+          ""
+        ) : (
+          <div class="flex flex-col gap-0">
+            {l?.hide?.productName ? (
+              ""
+            ) : (
+              <span
+                class={`truncate text-base-content ${
+                  l?.basics?.productTitleSize === "Normal"
+                    ? "text-base"
+                    : "text-xl"
+                }`}
+                dangerouslySetInnerHTML={{ __html: name?.toUpperCase() ?? "" }}
+              />
+            )}
+            {l?.hide?.productDescription ? (
+              ""
+            ) : (
+              <div
+                class="truncate text-sm lg:text-sm text-neutral"
+                dangerouslySetInnerHTML={{ __html: description ?? "" }}
+              />
+            )}
+          </div>
+        )}
+        {l?.hide?.allPrices ? (
+          ""
+        ) : (
+          <div class="flex flex-col gap-1">
             <div
-              class={`flex flex-col gap-0 ${
-                l?.basics?.oldPriceSize === "Normal"
-                  ? "lg:flex-row lg:gap-2"
-                  : ""
-              } ${align === "center" ? "justify-center" : "justify-start"}`}
+              class={`flex flex-col gap-0 lg:gap-1 ${
+                align === "center" ? "justify-center" : "justify-between"
+              } ${priceFlex}`}
             >
               <div
-                class={`line-through text-base-300 text-xs ${
+                class={`line-through text-base-300 text-sm mt-auto ${
                   l?.basics?.oldPriceSize === "Normal" ? "lg:text-xl" : ""
                 }`}
               >
                 {formatPrice(listPrice, offers?.priceCurrency)}
               </div>
-              <div class="text-accent text-base lg:text-xl">
-                {formatPrice(price, offers?.priceCurrency)}
+              <div class={`text-accent text-base ${priceFontSize}`}>
+                <span class={spanSize}>
+                  <span class={hiddenSpan}>Por </span>R${" "}
+                </span>
+                {price!.toFixed(2).replace(".", ",")}
               </div>
             </div>
-            {l?.hide?.installments
-              ? ""
-              : (
-                <div class="text-base-300 text-sm lg:text-base truncate">
-                  ou {installments}
-                </div>
-              )}
+            {l?.hide?.installments ? (
+              ""
+            ) : (
+              <div
+                class="text-base-300 text-sm lg:text-base truncate"
+                dangerouslySetInnerHTML={{ __html: installments ?? "" }}
+              ></div>
+            )}
           </div>
         )}
 
         {/* SKU Selector */}
         {l?.elementsPositions?.skuSelector === "Bottom" && (
           <>
-            {l?.hide?.skuSelector ? "" : (
-              <ul
+            {l?.hide?.skuSelector ? (
+              ""
+            ) : (
+              <div
                 class={`flex items-center gap-2 w-full ${
                   align === "center" ? "justify-center" : "justify-start"
                 } ${l?.onMouseOver?.showSkuSelector ? "lg:hidden" : ""}`}
               >
-                {skuSelector}
-              </ul>
+                <select
+                  id="countries"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm block w-full p-2.5"
+                >
+                  <option selected>Escolha um tamanho</option>
+                  {skuSelector}
+                </select>
+              </div>
             )}
           </>
         )}
 
-        {!l?.hide?.cta
-          ? (
-            <div
-              class={`flex-auto flex items-end ${
-                l?.onMouseOver?.showCta ? "lg:hidden" : ""
-              }`}
-            >
-              {cta}
-            </div>
-          )
-          : ""}
+        {!l?.hide?.cta ? (
+          <div
+            class={`flex-auto flex items-end ${
+              l?.onMouseOver?.showCta ? "lg:hidden" : ""
+            }`}
+          >
+            {cta}
+          </div>
+        ) : (
+          ""
+        )}
       </div>
     </div>
   );

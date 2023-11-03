@@ -11,7 +11,6 @@ import { useOffer } from "$store/sdk/useOffer.ts";
 import { usePlatform } from "$store/sdk/usePlatform.tsx";
 import type { Product } from "apps/commerce/types.ts";
 import { mapProductToAnalyticsItem } from "apps/commerce/utils/productToAnalyticsItem.ts";
-import { formatPrice } from "$store/sdk/format.ts";
 
 export interface Props {
   products: Product[] | null;
@@ -39,7 +38,7 @@ function ProductShelf({
   }
 
   return (
-    <div class="w-full container  py-8 flex flex-col gap-12 lg:gap-16 lg:py-10">
+    <div class="w-full container py-8 flex flex-col gap-12 lg:gap-16 lg:py-10">
       <Header
         title={title || ""}
         description={description || ""}
@@ -55,10 +54,14 @@ function ProductShelf({
           {products?.map((product, index) => {
             const { offers } = product;
             const productOffers = useOffer(offers);
+            const width =
+              cardLayout?.basics?.iconPosition === "Center"
+                ? "w-[270px] sm:w-[292px]"
+                : "w-[350px] sm:w-[400px]";
             return (
               <Slider.Item
                 index={index}
-                class="carousel-item w-[270px] sm:w-[292px] first:pl-6 sm:first:pl-0 last:pr-6 sm:last:pr-0"
+                class={`carousel-item ${width} first:pl-6 sm:first:pl-0 last:pr-6 sm:last:pr-0`}
               >
                 <ProductCard
                   product={product}
@@ -93,7 +96,7 @@ function ProductShelf({
               items: products.map((product) =>
                 mapProductToAnalyticsItem({
                   product,
-                  ...(useOffer(product.offers)),
+                  ...useOffer(product.offers),
                 })
               ),
             },
